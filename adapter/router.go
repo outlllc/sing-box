@@ -91,6 +91,7 @@ type Rule interface {
 
 type DNSRule interface {
 	Rule
+	MatchFallback(metadata *InboundContext) bool
 	DisableCache() bool
 	RewriteTTL() *uint32
 }

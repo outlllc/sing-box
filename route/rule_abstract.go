@@ -101,6 +101,15 @@ func (r *abstractDefaultRule) Match(metadata *adapter.InboundContext) bool {
 		return true
 	}
 
+	if metadata.DnsFallBack {
+		for _, item := range r.destinationAddressItems {
+			if item.Match(metadata) {
+				return !r.invert
+			}
+		}
+		return r.invert
+	}
+
 	if len(r.sourceAddressItems) > 0 && !metadata.SourceAddressMatch {
 		for _, item := range r.sourceAddressItems {
 			if item.Match(metadata) {
@@ -110,7 +119,7 @@ func (r *abstractDefaultRule) Match(metadata *adapter.InboundContext) bool {
 		}
 	}
 
-	if len(r.sourcePortItems) > 0 && !metadata.SourceAddressMatch {
+	if !metadata.DnsFallBack && len(r.sourcePortItems) > 0 && !metadata.SourceAddressMatch {
 		for _, item := range r.sourcePortItems {
 			if item.Match(metadata) {
 				metadata.SourcePortMatch = true
@@ -119,7 +128,7 @@ func (r *abstractDefaultRule) Match(metadata *adapter.InboundContext) bool {
 		}
 	}
 
-	if len(r.destinationAddressItems) > 0 && !metadata.SourceAddressMatch {
+	if !metadata.DnsFallBack && len(r.destinationAddressItems) > 0 && !metadata.SourceAddressMatch {
 		for _, item := range r.destinationAddressItems {
 			if item.Match(metadata) {
 				metadata.DestinationAddressMatch = true
@@ -240,6 +249,9 @@ func (r *abstractLogicalRule) Close() error {
 }
 
 func (r *abstractLogicalRule) Match(metadata *adapter.InboundContext) bool {
+	if metadata.DnsFallBack {
+		return false
+	}
 	if r.mode == C.LogicalTypeAnd {
 		return common.All(r.rules, func(it adapter.HeadlessRule) bool {
 			metadata.ResetRuleCache()
