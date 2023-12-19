@@ -47,17 +47,6 @@ jobs:
           VERSION=$(CGO_ENABLED=0 go run ./cmd/internal/read_tag)
           CGO_ENABLED=0 GOARCH=amd64 GOOS=windows go build -v -trimpath -ldflags "-X 'github.com/sagernet/sing-box/constant.Version=${VERSION}' -s -w -buildid=" -tags ${TAGS} ./cmd/sing-box
 
-      # - name: Post to channel with arm64, android
-        # env:
-          # CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
-          # BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-        # run: |
-          # pip install pyTelegramBotAPI
-          # path="$GITHUB_WORKSPACE/sing-box"
-          # VERSION=$(CGO_ENABLED=0 go run ./cmd/internal/read_tag)
-          # CAPTION=$(echo -e "sing-box version ${VERSION}\n\nEnvironment: go1.21.3 android/arm64\nTags: ${TAGS}\nCGO: enabled\n\n合并 SagerNet/sing-box 和 PuerNya/sing-box 分支，解决冲突。")
-          # python3 $GITHUB_WORKSPACE/.github/scripts/tg_bot.py "$BOT_TOKEN" "$CHANNEL_ID" "$path" "$CAPTION"
-
       - name: Upload artifact with arm64, android
         uses: actions/upload-artifact@v3
         with:

@@ -45,7 +45,7 @@ if __name__ == '__main__':
   # 待上传文件的路径
   upload_path = argv[2]
   #创建连接
-  tb = telebot.TeleBot(TOKEN)
+  tb = telebot.TeleBot(TOKEN, parse_mode = "MarkdownV2")
   #开始上传
   if len(argv) == 3:
     upload(tb, chat_id, upload_path)
