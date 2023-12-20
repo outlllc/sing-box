@@ -67,5 +67,5 @@ jobs:
           pip install pyTelegramBotAPI
           path="$GITHUB_WORKSPACE/sing-box"
           VERSION=$(CGO_ENABLED=0 go run ./cmd/internal/read_tag)
-          CAPTION=$(echo -e "sing-box version ${VERSION}\n\nEnvironment: go1.21.4 android/arm64\nTags: ${TAGS}\nCGO: enabled\n\n合并 SagerNet/sing-box 和 PuerNya/sing-box 的 outbound-providers，windows 请前往 GitHub 下载: https://github.com/jasmoli/sing-box/actions/runs/${{ github.run_id }}\n\ncommit: ${{ github.event.head_commit.message }}")
+          CAPTION=$(echo -e "sing-box version ${VERSION}\n\nEnvironment: go1.21.4 android/arm64\nTags: ${TAGS}\nCGO: enabled\n\n合并 SagerNet/sing-box 和 PuerNya/sing-box 的 outbound-providers，windows 请前往 <a href=\"https://github.com/jasmoli/sing-box/actions/runs/${{ github.run_id }}\">GitHub</a> 下载\n\ncommit: ${{ github.event.head_commit.message }}")
           python3 $GITHUB_WORKSPACE/.github/scripts/tg_bot.py "$BOT_TOKEN" "$CHANNEL_ID" "$path" "$CAPTION"
