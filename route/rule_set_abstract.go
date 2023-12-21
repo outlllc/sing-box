@@ -26,6 +26,7 @@ type abstractRuleSet struct {
 	metadata    adapter.RuleSetMetadata
 	rules       []adapter.HeadlessRule
 	updatedTime time.Time
+	useIPRule   bool
 }
 
 func (s *abstractRuleSet) Tag() string {
@@ -42,6 +43,10 @@ func (s *abstractRuleSet) Format() string {
 
 func (s *abstractRuleSet) UpdatedTime() time.Time {
 	return s.updatedTime
+}
+
+func (s *abstractRuleSet) UseIPRule() bool {
+	return s.useIPRule
 }
 
 func (s *abstractRuleSet) Match(metadata *adapter.InboundContext) bool {
@@ -140,6 +145,9 @@ func (s *abstractRuleSet) loadData(router adapter.Router, content []byte) error 
 			return E.Cause(err, "parse rule_set.rules.[", i, "]")
 		}
 		rules[i] = rule
+		if rule.UseIPRule() {
+			s.useIPRule = true
+		}
 	}
 	s.metadata.ContainsProcessRule = hasHeadlessRule(plainRuleSet.Rules, isProcessHeadlessRule)
 	s.metadata.ContainsWIFIRule = hasHeadlessRule(plainRuleSet.Rules, isWIFIHeadlessRule)
