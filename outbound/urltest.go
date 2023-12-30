@@ -44,6 +44,7 @@ func NewURLTest(ctx context.Context, router adapter.Router, logger log.ContextLo
 	outbound := &URLTest{
 		myOutboundAdapter: myOutboundAdapter{
 			protocol:     C.TypeURLTest,
+			network:      []string{N.NetworkTCP, N.NetworkUDP},
 			router:       router,
 			logger:       logger,
 			tag:          tag,
@@ -160,7 +161,12 @@ func (s *URLTest) Close() error {
 func (s *URLTest) Now() string {
 	s.group.RLock()
 	defer s.group.RUnlock()
-	return s.group.Select(N.NetworkTCP).Tag()
+	if s.group.selectedOutboundTCP != nil {
+		return s.group.selectedOutboundTCP.Tag()
+	} else if s.group.selectedOutboundUDP != nil {
+		return s.group.selectedOutboundUDP.Tag()
+	}
+	return ""
 }
 
 func (s *URLTest) SelectedOutbound(network string) adapter.Outbound {
@@ -196,6 +202,9 @@ func (s *URLTest) DialContext(ctx context.Context, network string, destination M
 	s.group.RUnlock()
 	s.group.Start()
 	outbound := s.group.Select(network)
+	if outbound == nil {
+		return nil, E.New("missing supported outbound")
+	}
 	conn, err := outbound.DialContext(ctx, network, destination)
 	if err == nil {
 		return s.group.interruptGroup.NewConn(conn, interrupt.IsExternalConnectionFromContext(ctx)), nil
@@ -210,6 +219,9 @@ func (s *URLTest) ListenPacket(ctx context.Context, destination M.Socksaddr) (ne
 	s.group.RUnlock()
 	s.group.Start()
 	outbound := s.group.Select(N.NetworkUDP)
+	if outbound == nil {
+		return nil, E.New("missing supported outbound")
+	}
 	conn, err := outbound.ListenPacket(ctx, destination)
 	if err == nil {
 		return s.group.interruptGroup.NewPacketConn(conn, interrupt.IsExternalConnectionFromContext(ctx)), nil
@@ -449,12 +461,12 @@ func (g *URLTestGroup) urlTest(ctx context.Context, link string, force bool) (ma
 func (g *URLTestGroup) performUpdateCheck() {
 	outbound := g.Select(N.NetworkTCP)
 	var updated bool
-	if outbound != g.selectedOutboundTCP {
+	if outbound != nil && outbound != g.selectedOutboundTCP {
 		g.selectedOutboundTCP = outbound
 		updated = true
 	}
 	outbound = g.Select(N.NetworkUDP)
-	if outbound != g.selectedOutboundUDP {
+	if outbound != nil && outbound != g.selectedOutboundUDP {
 		g.selectedOutboundUDP = outbound
 		updated = true
 	}
