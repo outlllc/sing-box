@@ -42,8 +42,10 @@ type DefaultDNSRule struct {
 func NewDefaultDNSRule(router adapter.Router, logger log.ContextLogger, options option.DefaultDNSRule) (*DefaultDNSRule, error) {
 	rule := &DefaultDNSRule{
 		abstractDefaultRule: abstractDefaultRule{
-			invert:   options.Invert,
-			outbound: options.Server,
+			abstractRule: abstractRule{
+				invert:   options.Invert,
+				outbound: options.Server,
+			},
 		},
 		disableCache: options.DisableCache,
 		rewriteTTL:   options.RewriteTTL,
@@ -222,9 +224,11 @@ type LogicalDNSRule struct {
 func NewLogicalDNSRule(router adapter.Router, logger log.ContextLogger, options option.LogicalDNSRule) (*LogicalDNSRule, error) {
 	r := &LogicalDNSRule{
 		abstractLogicalRule: abstractLogicalRule{
-			rules:    make([]adapter.HeadlessRule, len(options.Rules)),
-			invert:   options.Invert,
-			outbound: options.Server,
+			abstractRule: abstractRule{
+				invert:   options.Invert,
+				outbound: options.Server,
+			},
+			rules: make([]adapter.HeadlessRule, len(options.Rules)),
 		},
 		disableCache: options.DisableCache,
 		rewriteTTL:   options.RewriteTTL,
